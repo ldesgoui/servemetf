@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -71,8 +72,18 @@ func (c Context) newRequest(data interface{}, method, url string) *http.Request 
 	return req
 }
 
-func (c Context) GetReservationTime() (starts time.Time, ends time.Time, err error) {
-	req := c.newRequest(nil, "GET", "http://serveme.tf/api/reservations/new?api_key="+c.APIKey)
+func (c Context) GetReservationTime(steamID string) (starts time.Time, ends time.Time, err error) {
+	u := url.URL{
+		Scheme: "https",
+		Host:   "serveme.tf",
+		Path:   "api/reservations/new",
+	}
+	values := u.Query()
+	values.Set("api_key", c.APIKey)
+	values.Set("steam_uid", steamID)
+	u.RawQuery = values.Encode()
+
+	req := c.newRequest(nil, "GET", u.String())
 	resp, err := client.Do(req)
 	if err != nil {
 		return
@@ -90,7 +101,17 @@ func (c Context) GetReservationTime() (starts time.Time, ends time.Time, err err
 	return
 }
 
-func (c Context) FindServers(starts, ends time.Time) (Response, error) {
+func (c Context) FindServers(starts, ends time.Time, steamID string) (Response, error) {
+	u := url.URL{
+		Scheme: "https",
+		Host:   "serveme.tf",
+		Path:   "api/reservations/find_servers",
+	}
+	values := u.Query()
+	values.Set("api_key", c.APIKey)
+	values.Set("steam_uid", steamID)
+	u.RawQuery = values.Encode()
+
 	reservation := Reservation{
 		StartsAt: starts.Format(TimeFormat),
 		EndsAt:   ends.Format(TimeFormat),
@@ -98,7 +119,7 @@ func (c Context) FindServers(starts, ends time.Time) (Response, error) {
 
 	req := c.newRequest(struct {
 		Reservation Reservation `json:"reservation"`
-	}{reservation}, "POST", "http://serveme.tf/api/reservations/find_servers?api_key="+c.APIKey)
+	}{reservation}, "POST", u.String())
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -112,9 +133,19 @@ func (c Context) FindServers(starts, ends time.Time) (Response, error) {
 	return jsonresp, err
 }
 
-func (c Context) Create(reservation Reservation) (Response, error) {
+func (c Context) Create(reservation Reservation, steamID string) (Response, error) {
+	u := url.URL{
+		Scheme: "https",
+		Host:   "serveme.tf",
+		Path:   "api/reservations",
+	}
+	values := u.Query()
+	values.Set("api_key", c.APIKey)
+	values.Set("steam_uid", steamID)
+	u.RawQuery = values.Encode()
+
 	var response Response
-	req := c.newRequest(reservation, "POST", "http://serveme.tf/api/reservations?api_key="+c.APIKey)
+	req := c.newRequest(reservation, "POST", u.String())
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -136,9 +167,18 @@ func (c Context) Create(reservation Reservation) (Response, error) {
 	return response, nil
 }
 
-func (c Context) Delete(id int) error {
-	str := strconv.Itoa(id)
-	req := c.newRequest(nil, "DELETE", "http://serveme.tf/api/reservations/"+str+"?api_key"+c.APIKey)
+func (c Context) Delete(id int, steamID string) error {
+	u := url.URL{
+		Scheme: "https",
+		Host:   "serveme.tf",
+		Path:   "api/reservations/" + strconv.Itoa(id),
+	}
+	values := u.Query()
+	values.Set("api_key", c.APIKey)
+	values.Set("steam_uid", steamID)
+	u.RawQuery = values.Encode()
+
+	req := c.newRequest(nil, "DELETE", u.String())
 	_, err := client.Do(req)
 	return err
 }
