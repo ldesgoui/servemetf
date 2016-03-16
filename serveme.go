@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -51,6 +50,7 @@ type Response struct {
 }
 
 type Context struct {
+	Host   string
 	APIKey string
 }
 
@@ -75,7 +75,7 @@ func (c Context) newRequest(data interface{}, method, url string) *http.Request 
 func (c Context) GetReservationTime(steamID string) (starts time.Time, ends time.Time, err error) {
 	u := url.URL{
 		Scheme: "https",
-		Host:   "serveme.tf",
+		Host:   c.Host,
 		Path:   "api/reservations/new",
 	}
 	values := u.Query()
@@ -104,7 +104,7 @@ func (c Context) GetReservationTime(steamID string) (starts time.Time, ends time
 func (c Context) FindServers(starts, ends time.Time, steamID string) (Response, error) {
 	u := url.URL{
 		Scheme: "https",
-		Host:   "serveme.tf",
+		Host:   c.Host,
 		Path:   "api/reservations/find_servers",
 	}
 	values := u.Query()
@@ -123,7 +123,6 @@ func (c Context) FindServers(starts, ends time.Time, steamID string) (Response, 
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println(resp)
 		return Response{}, err
 	}
 
@@ -136,7 +135,7 @@ func (c Context) FindServers(starts, ends time.Time, steamID string) (Response, 
 func (c Context) Create(reservation Reservation, steamID string) (Response, error) {
 	u := url.URL{
 		Scheme: "https",
-		Host:   "serveme.tf",
+		Host:   c.Host,
 		Path:   "api/reservations",
 	}
 	values := u.Query()
@@ -170,7 +169,7 @@ func (c Context) Create(reservation Reservation, steamID string) (Response, erro
 func (c Context) Delete(id int, steamID string) error {
 	u := url.URL{
 		Scheme: "https",
-		Host:   "serveme.tf",
+		Host:   c.Host,
 		Path:   "api/reservations/" + strconv.Itoa(id),
 	}
 	values := u.Query()
