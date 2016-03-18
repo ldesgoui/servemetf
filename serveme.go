@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -21,7 +22,7 @@ type Reservation struct {
 	FirstMap    string `json:"first_map,omitempty"`
 	WhitelistID int    `json:"whitelist_id,omitempty"`
 	ID          int    `json:"id,omitempty"`
-	LogSecret   uint64 `json:"logsecret,omitempty"`
+	LogSecret   string `json:"logsecret,omitempty"`
 	Server      struct {
 		Name      string `json:"name"`
 		IPAndPort string `json:"ip_and_port"`
@@ -89,9 +90,8 @@ func (c Context) GetReservationTime(steamID string) (starts time.Time, ends time
 		return
 	}
 
-	dec := json.NewDecoder(resp.Body)
 	var jsonresp Response
-	err = dec.Decode(&jsonresp)
+	err = json.NewDecoder(resp.Body).Decode(&jsonresp)
 	if err != nil {
 		return
 	}
@@ -126,9 +126,9 @@ func (c Context) FindServers(starts, ends time.Time, steamID string) (Response, 
 		return Response{}, err
 	}
 
-	dec := json.NewDecoder(resp.Body)
 	var jsonresp Response
-	err = dec.Decode(&jsonresp)
+
+	err = json.NewDecoder(resp.Body).Decode(&jsonresp)
 	return jsonresp, err
 }
 
@@ -153,12 +153,11 @@ func (c Context) Create(reservation Reservation, steamID string) (Response, erro
 
 	if resp.StatusCode == 400 {
 		return response, ErrAlreadyReserved
-	} else if resp.StatusCode == 400 {
+	} else if resp.StatusCode == 404 {
 		return response, ErrNotFound
 	}
 
-	dec := json.NewDecoder(resp.Body)
-	err = dec.Decode(&response)
+	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
 		return response, err
 	}
