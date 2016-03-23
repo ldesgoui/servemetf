@@ -13,6 +13,7 @@ import (
 var client = &http.Client{Timeout: 10 * time.Second}
 
 type Reservation struct {
+	Status      string `json:"status"`
 	StartsAt    string `json:"starts_at"`
 	EndsAt      string `json:"ends_at"`
 	ServerID    int    `json:"server_id,omitempty"`
@@ -59,8 +60,8 @@ const (
 )
 
 var (
-	ErrAlreadyReserved = errors.New("server has already been reserved")
-	ErrNotFound        = errors.New("server not found")
+	ErrAlreadyReserved = errors.New("serveme: you have already reserved a server")
+	ErrNotFound        = errors.New("serveme: server not found")
 )
 
 func (c Context) newRequest(data interface{}, method, url string) *http.Request {
@@ -70,6 +71,33 @@ func (c Context) newRequest(data interface{}, method, url string) *http.Request 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "*/*")
 	return req
+}
+
+// ID is reservation id
+func (c Context) Status(id int, steamID string) (string, error) {
+	u := url.URL{
+		Scheme: "https",
+		Host:   c.Host,
+		Path:   "api/reservations/" + strconv.FormatUint(uint64(id), 10),
+	}
+
+	values := u.Query()
+	values.Set("api_key", c.APIKey)
+	values.Set("steam_uid", steamID)
+	u.RawQuery = values.Encode()
+
+	req := c.newRequest(nil, "GET", u.String())
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	var jsonresp Response
+	err = json.NewDecoder(resp.Body).Decode(&jsonresp)
+	if err != nil {
+		return "", err
+	}
+
+	return jsonresp.Reservation.Status, nil
 }
 
 func (c Context) GetReservationTime(steamID string) (starts time.Time, ends time.Time, err error) {
