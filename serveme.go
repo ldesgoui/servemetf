@@ -23,6 +23,7 @@ type Reservation struct {
 	WhitelistID int    `json:"whitelist_id,omitempty"`
 	ID          int    `json:"id,omitempty"`
 	LogSecret   string `json:"logsecret,omitempty"`
+	Ended       bool   `json:"ended"`
 	Server      struct {
 		Name      string `json:"name"`
 		IPAndPort string `json:"ip_and_port"`
@@ -206,4 +207,30 @@ func (c Context) Delete(id int, steamID string) error {
 	req := c.newRequest(nil, "DELETE", u.String())
 	_, err := client.Do(req)
 	return err
+}
+
+func (c Context) Ended(id int, steamID string) (bool, error) {
+	u := url.URL{
+		Scheme: "https",
+		Host:   c.Host,
+		Path:   "api/reservations/" + strconv.Itoa(id),
+	}
+	values := u.Query()
+	values.Set("api_key", c.APIKey)
+	values.Set("steam_uid", steamID)
+	u.RawQuery = values.Encode()
+
+	req := c.newRequest(nil, "GET", u.String())
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+
+	var jsonresp Response
+	err = json.NewDecoder(resp.Body).Decode(&jsonresp)
+	if err != nil {
+		return false, err
+	}
+
+	return jsonresp.Reservation.Ended || jsonresp.Reservation.Status == "ended", nil
 }
