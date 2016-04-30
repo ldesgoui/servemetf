@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -30,7 +31,10 @@ func (c Context) DownloadDemo(id int, steamID, fileName string) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		file.Close()
+		os.Remove(file.Name())
+	}()
 
 	err = download(url, file)
 	if err != nil {
