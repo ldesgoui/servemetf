@@ -63,5 +63,5 @@ func (c Context) DownloadDemo(id int, steamID, fileName string) error {
 
 func saveDemo(r io.Reader, name string) error {
 	bytes, _ := ioutil.ReadAll(r)
-	return ioutil.WriteFile(name, bytes, 0644)
+	return ioutil.WriteFile(name, bytes, 0755)
 }
