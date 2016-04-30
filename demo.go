@@ -32,7 +32,6 @@ func (c Context) DownloadDemo(id int, steamID, fileName string) error {
 	}
 	defer file.Close()
 
-	println(file.Name())
 	err = download(url, file)
 	if err != nil {
 		return err
