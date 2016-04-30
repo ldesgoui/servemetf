@@ -45,7 +45,6 @@ func (c Context) DownloadDemo(id int, steamID, fileName string) error {
 	defer r.Close()
 	for _, f := range r.File {
 		if strings.HasSuffix(f.Name, ".dem") {
-			println("yes")
 			reader, err := f.Open()
 			if err != nil {
 				return err
