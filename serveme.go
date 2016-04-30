@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -236,11 +237,25 @@ func (c Context) Ended(id int, steamID string) (bool, error) {
 	return jsonresp.Reservation.Ended || jsonresp.Reservation.Status == "ended", nil
 }
 
-func (c Context) GetZipFileURL(id int) string {
-	_ = url.URL{
+func (c Context) GetZipFileURL(id int, steamID string) (string, error) {
+	u := url.URL{
 		Scheme: "http",
 		Host:   c.Host,
 		Path:   "api/reservations/" + strconv.Itoa(id),
 	}
-	return ""
+	values := u.Query()
+	values.Set("api_key", c.APIKey)
+	values.Set("steam_uid", steamID)
+	u.RawQuery = values.Encode()
+
+	req := c.newRequest(nil, "GET", u.String())
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	var jsonresp Response
+	err = json.NewDecoder(resp.Body).Decode(&jsonresp)
+
+	return jsonresp.Reservation.ZipFileURL, err
 }
