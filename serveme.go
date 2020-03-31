@@ -78,7 +78,7 @@ func (c Context) newRequest(data interface{}, method, url string) *http.Request 
 // ID is reservation id
 func (c Context) Status(id int, steamID string) (string, error) {
 	u := url.URL{
-		Scheme: "http",
+		Scheme: "https",
 		Host:   c.Host,
 		Path:   "api/reservations/" + strconv.FormatUint(uint64(id), 10),
 	}
@@ -104,7 +104,7 @@ func (c Context) Status(id int, steamID string) (string, error) {
 
 func (c Context) GetReservationTime(steamID string) (starts time.Time, ends time.Time, err error) {
 	u := url.URL{
-		Scheme: "http",
+		Scheme: "https",
 		Host:   c.Host,
 		Path:   "api/reservations/new",
 	}
@@ -132,7 +132,7 @@ func (c Context) GetReservationTime(steamID string) (starts time.Time, ends time
 
 func (c Context) FindServers(starts, ends time.Time, steamID string) (Response, error) {
 	u := url.URL{
-		Scheme: "http",
+		Scheme: "https",
 		Host:   c.Host,
 		Path:   "api/reservations/find_servers",
 	}
@@ -163,7 +163,7 @@ func (c Context) FindServers(starts, ends time.Time, steamID string) (Response, 
 
 func (c Context) Create(reservation Reservation, steamID string) (Response, error) {
 	u := url.URL{
-		Scheme: "http",
+		Scheme: "https",
 		Host:   c.Host,
 		Path:   "api/reservations",
 	}
@@ -196,7 +196,7 @@ func (c Context) Create(reservation Reservation, steamID string) (Response, erro
 
 func (c Context) Delete(id int, steamID string) error {
 	u := url.URL{
-		Scheme: "http",
+		Scheme: "https",
 		Host:   c.Host,
 		Path:   "api/reservations/" + strconv.Itoa(id),
 	}
@@ -212,7 +212,7 @@ func (c Context) Delete(id int, steamID string) error {
 
 func (c Context) Ended(id int, steamID string) (bool, error) {
 	u := url.URL{
-		Scheme: "http",
+		Scheme: "https",
 		Host:   c.Host,
 		Path:   "api/reservations/" + strconv.Itoa(id),
 	}
@@ -238,7 +238,7 @@ func (c Context) Ended(id int, steamID string) (bool, error) {
 
 func (c Context) GetZipFileURL(id int, steamID string) (string, error) {
 	u := url.URL{
-		Scheme: "http",
+		Scheme: "https",
 		Host:   c.Host,
 		Path:   "api/reservations/" + strconv.Itoa(id),
 	}
