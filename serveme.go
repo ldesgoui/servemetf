@@ -13,7 +13,9 @@ import (
 var client = &http.Client{Timeout: 10 * time.Second}
 
 type Reservation struct {
+	// https://github.com/Arie/serveme/blob/f9051d618d237ca085a248fa1d29132cf5159845/app/models/reservation.rb#L223-L242
 	Status      string `json:"status"`
+
 	StartsAt    string `json:"starts_at"`
 	EndsAt      string `json:"ends_at"`
 	ServerID    int    `json:"server_id,omitempty"`
@@ -233,7 +235,7 @@ func (c Context) Ended(id int, steamID string) (bool, error) {
 		return false, err
 	}
 
-	return jsonresp.Reservation.Ended || jsonresp.Reservation.Status == "ended", nil
+	return jsonresp.Reservation.Ended || jsonresp.Reservation.Status == "Ended", nil
 }
 
 func (c Context) GetZipFileURL(id int, steamID string) (string, error) {
